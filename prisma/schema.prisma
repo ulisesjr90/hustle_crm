@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   Int                 @id @default(autoincrement())
+  uid                  String              @unique
+  name                 String
+  email                String              @unique
+  role                 String
+  lastLogin            DateTime?
+  loginCount           Int                 @default(0)
+  failedLoginAttempts  Int                 @default(0)
+  passwordChangedAt    DateTime?
+  dateCreated          DateTime            @default(now())
+  deletedAt            DateTime?
+  ownedLeads           Lead[]              @relation("LeadOwner")
+  assignedLeads        Lead[]              @relation("LeadAssignee")
+  sharedLeads          Lead[]              @relation("LeadSharedWith")
+  comments             Comment[]
+  tasks                Task[]
+  notifications        Notification[]
+  billings             Billing[]
+  auditLogs            AuditLog[]
+  passwordResetLogs    PasswordResetLog[]
+  userActivityLogs     UserActivityLog[]
+  userConnections      UserConnection[]    @relation("UserConnections")
+  connectedUsers       UserConnection[]    @relation("ConnectedUsers")
+  userLeadPermissions  UserLeadPermission[]
+  preferences          UserPreference?
+}
+
+model Lead {
+  id            Int       @id @default(autoincrement())
+  target        String?
+  leadName      String
+  ownerId       Int
+  assignedToId  Int?
+  sharedWithId  Int?
+  address       String?
+  phone         String?
+  email         String?
+  currentStatus String
+  priority      String?
+  lastVisit     DateTime?
+  notes         String?   @db.Text
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  comments      String?   @db.Text
+  inShopSince   DateTime?
+  insulator     String?
+  owner         User      @relation("LeadOwner", fields: [ownerId], references: [id])
+  assignedTo    User?     @relation("LeadAssignee", fields: [assignedToId], references: [id])
+  sharedWith    User?     @relation("LeadSharedWith", fields: [sharedWithId], references: [id])
+  leadComments  Comment[]
+  tasks         Task[]
+  permissions   UserLeadPermission[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  leadId    Int
+  userId    Int
+  lead      Lead     @relation(fields: [leadId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  description String
+  dueDate     DateTime
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  leadId      Int
+  userId      Int
+  lead        Lead     @relation(fields: [leadId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Billing {
+  id        Int      @id @default(autoincrement())
+  amount    Float
+  date      DateTime
+  status    String
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  action    String
+  timestamp DateTime @default(now())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model PasswordResetLog {
+  id        Int      @id @default(autoincrement())
+  timestamp DateTime @default(now())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model UserActivityLog {
+  id          Int      @id @default(autoincrement())
+  activity    String
+  timestamp   DateTime @default(now())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model UserConnection {
+  id               Int      @id @default(autoincrement())
+  userId           Int
+  connectedUserId  Int
+  createdAt        DateTime @default(now())
+  user             User     @relation("UserConnections", fields: [userId], references: [id])
+  connectedUser    User     @relation("ConnectedUsers", fields: [connectedUserId], references: [id])
+}
+
+model UserLeadPermission {
+  id           Int    @id @default(autoincrement())
+  permission   String
+  userId       Int
+  leadId       Int
+  user         User   @relation(fields: [userId], references: [id])
+  lead         Lead   @relation(fields: [leadId], references: [id])
+}
+
+model UserPreference {
+  userId                 Int     @id
+  theme                  String?
+  mapPreference          String?
+  notificationPreference String?
+  user                   User    @relation(fields: [userId], references: [id])
+}
