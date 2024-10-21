@@ -1,26 +1,26 @@
-// src/app/api/user/delete/route.js
+import prisma from '@/lib/prisma'; // Make sure Prisma is set up correctly
+
 export async function DELETE(req) {
-    try {
-      const { userId } = await req.json(); // Assuming you're passing the user ID in the body
-  
-      // Logic to delete the user from the database
-      await deleteUserFromDatabase(userId); // Placeholder function for your database logic
-  
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200, // HTTP status for "OK"
-        headers: { 'Content-Type': 'application/json' },
-      });
-    } catch (error) {
-      return new Response(JSON.stringify({ error: 'Error deleting user' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+  try {
+    const { userId } = await req.json(); // Extract user ID from request body
+
+    // Perform a soft delete by setting `deletedAt` to the current timestamp
+    const deletedUser = await prisma.user.update({
+      where: { id: parseInt(userId) },
+      data: {
+        deletedAt: new Date(), // Set the deletedAt timestamp
+      },
+    });
+
+    return new Response(JSON.stringify({ success: true, deletedUser }), {
+      status: 200, // HTTP status for "OK"
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    return new Response(JSON.stringify({ error: 'Error deleting user' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
-  
-  // Placeholder function for deleting the user from the database
-  async function deleteUserFromDatabase(userId) {
-    // Add your logic to delete the user from the database
-    return true; // Example return with a mock success status
-  }
-  
+}

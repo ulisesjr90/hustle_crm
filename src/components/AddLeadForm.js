@@ -1,14 +1,13 @@
-"use client";
+'use client';
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '../lib/firebase'; 
 import { getCurrentAddress } from '../lib/googleMaps'; 
-import Navbar from '../components/navbar';  // Corrected import
 
-export default function AddLeadForm() {
+export default function AddLeadForm({ isOpen, onClose }) {
   const [formData, setFormData] = useState({
-    target: '',  // Required field
+    target: '',
     leadName: '',
     ownerId: '',
     assignedToId: '',
@@ -17,7 +16,7 @@ export default function AddLeadForm() {
     phone: '',
     email: '',
     currentStatus: 'new',
-    appointmentDate: '', // Field for appointment
+    appointmentDate: '',
     priority: '',
     inShopSince: '',
     insulator: false,
@@ -60,6 +59,7 @@ export default function AddLeadForm() {
 
       if (response.ok) {
         router.push('/leads');
+        onClose(); // Close the modal after successfully adding the lead
       } else {
         console.error('Failed to create lead');
       }
@@ -68,22 +68,18 @@ export default function AddLeadForm() {
     }
   };
 
-  // Google Calendar link generation for appointments
-  const generateGoogleCalendarLink = () => {
-    const startDateTime = formData.appointmentDate;
-    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Lead%20Appointment&dates=${startDateTime}/${startDateTime}&details=Appointment%20with%20lead&location=${formData.address}`;
-  };
+  if (!isOpen) return null; // Close modal if not open
 
   return (
-    <div>
-      <Navbar user={auth.currentUser} />  {/* Make sure the Navbar is rendered and pass the user prop */}
-      <div className="max-w-lg mx-auto p-6 bg-gray-900 text-white rounded-lg shadow-md mt-10">
+    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+<div className="bg-gray-900 p-6 rounded-lg shadow-md overflow-auto max-w-sm w-full max-h-[90vh] relative"> {/* Adjusted to max-w-sm for a narrower width */}
+<button onClick={onClose} className="absolute top-2 right-2 text-white text-xl">X</button> {/* Close button */}
         <h1 className="text-2xl font-bold mb-6 text-center">Add New Lead</h1>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Target Field */}
           <div>
-            <label htmlFor="target" className="block text-sm font-medium mb-4">Target </label>
+            <label htmlFor="target" className="block text-sm font-medium mb-4">Target</label>
             <input
               type="text"
               id="target"

@@ -1,17 +1,18 @@
-'use client';
+'use client'; // Ensure this component runs on the client-side
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { auth } from '../lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import Navbar from './navbar';
 import Footer from './footer';
+import AddLeadForm from './AddLeadForm'; 
 
 export default function DashboardContent() {
   const [user, setUser] = useState(null);
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false); 
   const router = useRouter();
 
   useEffect(() => {
@@ -34,7 +35,7 @@ export default function DashboardContent() {
       const response = await fetch(`/api/user?uid=${uid}`);
       if (response.ok) {
         const userData = await response.json();
-        setUser(prev => ({ ...prev, ...userData }));
+        setUser((prev) => ({ ...prev, ...userData }));
       } else {
         console.error('Failed to fetch user data');
       }
@@ -64,28 +65,36 @@ export default function DashboardContent() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       <Navbar user={user} />
-      <main className="flex-grow container mx-auto px-4 py-8">
+      <main className="flex-grow container mx-auto px-2 md:px-4 py-8 max-w-xl">
         {leads.length === 0 ? (
-          <EmptyDashboard user={user} />
+          <EmptyDashboard user={user} openModal={() => setIsModalOpen(true)} />
         ) : (
           <LeadsList leads={leads} />
         )}
       </main>
       <Footer />
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+            <AddLeadForm isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function EmptyDashboard({ user }) {
+function EmptyDashboard({ user, openModal }) {
   return (
     <div className="text-center">
       <h1 className="text-3xl font-bold mb-4">Welcome, {user?.name || 'User'}</h1>
       <h2 className="text-5xl font-extrabold mb-8">Let's start hustling</h2>
-      <Link href="/addnewlead">
-        <button className="bg-red-600 text-white px-6 py-3 rounded-lg text-xl font-semibold hover:bg-red-700 transition duration-300">
-          Add New Lead
-        </button>
-      </Link>
+      <button
+        onClick={openModal}
+        className="bg-red-600 text-white px-6 py-3 rounded-lg text-xl font-semibold hover:bg-red-700 transition duration-300"
+      >
+        Add New Lead
+      </button>
     </div>
   );
 }
@@ -146,7 +155,6 @@ function LeadCard({ lead }) {
       </div>
       <div className="text-right">
         <p className="text-gray-500">{lead.distance} mi</p>
-        {/* Add status indicator or other icons here */}
       </div>
     </div>
   );
