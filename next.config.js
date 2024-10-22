@@ -1,7 +1,9 @@
-module.exports = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   output: 'export',
-  assetPrefix: './', // ensure relative path handling for assets
   images: {
-    unoptimized: true, // disable image optimization to make static export work on GitHub Pages
+    unoptimized: true,
   },
 };
+
+module.exports = nextConfig;
