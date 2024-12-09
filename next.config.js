@@ -1,9 +1,6 @@
-// next.config.js
-const isProd = process.env.NODE_ENV === 'production';
-
+/** @type {import('../next/next').NextConfig} */
 const nextConfig = {
-  basePath: isProd ? '/hustle_crm' : '',
-  assetPrefix: isProd ? '/hustle_crm/' : '',
+  reactStrictMode: true, 
 };
 
 module.exports = nextConfig;
