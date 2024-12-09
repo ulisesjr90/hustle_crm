@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "export": "next export"
   },
   "dependencies": {
     "@prisma/client": "^5.21.0",
@@ -14,6 +15,7 @@
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
     "daisyui": "^4.12.13",
+    "export": "^0.1.337",
     "firebase": "^10.14.1",
     "firebase-admin": "^12.6.0",
     "jsonwebtoken": "^9.0.2",
